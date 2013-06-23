@@ -442,6 +442,7 @@ int  i2c_read(uchar chip, uint addr, int alen, uchar *buffer, int len)
 		*buffer++ = read_byte(len == 0);
 	}
 	send_stop();
+
 	return(0);
 }
 
@@ -452,8 +453,8 @@ int  i2c_write(uchar chip, uint addr, int alen, uchar *buffer, int len)
 {
 	int shift, failures = 0;
 
-	PRINTD("i2c_write: chip %02X addr %02X alen %d buffer %p len %d\n",
-		chip, addr, alen, buffer, len);
+	PRINTD("i2c_write: chip %02X addr %02X alen %d buffer %p = %X len %d\n",
+		chip, addr, alen, buffer, *buffer, len);
 
 	send_start();
 	if(write_byte(chip << 1)) {	/* write cycle */

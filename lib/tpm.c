@@ -87,8 +87,10 @@ int pack_byte_string(uint8_t *str, size_t size, const char *format, ...)
 			return -1;
 		}
 
-		if (offset + length > size)
+		if (offset + length > size) {
+			printf("Size error\n");
 			return -1;
+		}
 
 		switch (*format) {
 		case 'b':
@@ -155,12 +157,15 @@ int unpack_byte_string(const uint8_t *str, size_t size, const char *format, ...)
 			length = va_arg(args, uint32_t);
 			break;
 		default:
-			debug("Couldn't recognize format string\n");
+			printf("Couldn't recognize format string\n");
 			return -1;
 		}
 
-		if (offset + length > size)
+		if (offset + length > size) {
+			printf("size error: offset + length > size\n");
+			printf("%d + %d > %d\n", offset, length, size);
 			return -1;
+		}
 
 		switch (*format) {
 		case 'b':
@@ -178,6 +183,7 @@ int unpack_byte_string(const uint8_t *str, size_t size, const char *format, ...)
 		}
 	}
 	va_end(args);
+	printf("Unpack done...\n");
 
 	return 0;
 }
@@ -369,6 +375,7 @@ uint32_t tpm_nv_write_value(uint32_t index, const void *data, uint32_t length)
 				length_offset, length,
 				data_offset, data, length))
 		return TPM_LIB_ERROR;
+	printf("COMMAND LENGTH: %d/n", tpm_command_size(buf));
 	err = tis_sendrecv(buf, tpm_command_size(buf),
 			response, &response_length);
 	if (err)
@@ -376,7 +383,7 @@ uint32_t tpm_nv_write_value(uint32_t index, const void *data, uint32_t length)
 
 	return 0;
 }
-
+//TODO: TPM_EXTEND
 uint32_t tpm_extend(uint32_t index, const void *in_digest, void *out_digest)
 {
 	const uint8_t command[34] = {
@@ -396,15 +403,26 @@ uint32_t tpm_extend(uint32_t index, const void *in_digest, void *out_digest)
 				in_digest_offset, in_digest,
 				PCR_DIGEST_LENGTH))
 		return TPM_LIB_ERROR;
+
 	err = tis_sendrecv(buf, tpm_command_size(buf),
 			response, &response_length);
 	if (err)
 		return err;
 
+	if (response_length == 10) {
+		printf("Error code returned:\n");
+		printf("  Tag : %X %X\n", response[0], response[1]);
+		printf("  Len : %X %X %X %X\n", response[2], response[3], response[4], response[5]);
+		printf("  Code: %X %X %X %X\n", response[6], response[7], response[8], response[9]);
+		return -1;
+	}
+
 	if (unpack_byte_string(response, response_length, "s",
 				out_digest_offset, out_digest,
-				PCR_DIGEST_LENGTH))
+				0)) {
+		printf("UNPACK ERROR\n");
 		return TPM_LIB_ERROR;
+	}
 
 	return 0;
 }
@@ -429,11 +447,19 @@ uint32_t tpm_pcr_read(uint32_t index, void *data, size_t count)
 				index_offset, index)) {
 		return TPM_LIB_ERROR;
 	}
-	printf("Call sendrecv...\n");
 	err = tis_sendrecv(buf, tpm_command_size(buf),
 			response, &response_length);
 	if (err)
 		return err;
+
+	if (response_length == 10) {
+		printf("Error code returned:\n");
+		printf("  Tag : %X %X\n", response[0], response[1]);
+		printf("  Len : %X %X %X %X\n", response[2], response[3], response[4], response[5]);
+		printf("  Code: %X %X %X %X\n", response[6], response[7], response[8], response[9]);
+		return -1;
+	}
+
 	if (unpack_byte_string(response, response_length, "s",
 				out_digest_offset, data, PCR_DIGEST_LENGTH))
 		return TPM_LIB_ERROR;
@@ -569,4 +595,12 @@ uint32_t tpm_get_capability(uint32_t cap_area, uint32_t sub_cap,
 		return TPM_LIB_ERROR;
 
 	return 0;
+}
+
+uint32_t tpm_sha1_start(void)
+{
+	const uint8_t command[10] = {
+		0x0, 0xc1, 0x0, 0x0, 0x0, 0xa, 0x0, 0x0, 0x0, 0xA0,
+	};
+	return tpm_send_command(command);
 }
