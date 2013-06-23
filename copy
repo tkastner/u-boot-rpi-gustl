@@ -1,0 +1,36 @@
+#!/bin/zsh
+
+IMG=u-boot.bin
+KERNEL=kernel.img
+SDCARD=/media/boot
+SDROOT=/media/280a5334-c561-41c3-a9bf-b7a42ca61990
+IMGTOOL=/home/thms/Trustberry/tools/mkimage
+
+OLDKERNEL=$IMGTOOL/kernel.img
+OLDBIN=$IMGTOOL/u-boot.bin
+
+echo 'Remove old files...'
+if [[ -e $OLDKERNEL ]]; then
+	rm $OLDKERNEL
+fi
+
+if [[ -e $OLDBIN ]]; then
+	rm $OLDBIN
+fi
+
+cp $IMG $IMGTOOL
+
+cd $IMGTOOL
+
+python imagetool-uncompressed.py $IMG
+
+echo 'Copying kernel...'
+if [[ -e $SDCARD ]]; then
+	cp $KERNEL $SDCARD
+fi
+
+echo 'Unmounting SD-Card...'
+sudo umount $SDCARD
+sudo umount $SDROOT
+
+sync
