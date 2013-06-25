@@ -3,11 +3,11 @@ mmc rescan
 setenv pcr 0
 setenv sha1sum 0
 
-sha1sum 0x01 40 sha1sum
-
-tpm open
-tpm extend 2 ${sha1sum}
-tpm close
-
 fatload mmc 0:1 ${loadaddr} uImage
+
+sha1sum ${loadaddr} 3114016 sha1sum
+
+tpm init
+tpm extend 0 ${sha1sum}
+
 bootm

@@ -27,15 +27,6 @@
 #include <asm/unaligned.h>
 #include <linux/string.h>
 
-static void do_tpm_open(void)
-{
-
-	int ret = tis_open();
-
-	printf("TIS open returned: %d\n", ret);
-
-}
-
 static void do_tpm_close(void)
 {
 
@@ -47,29 +38,6 @@ static void do_tpm_close(void)
 		printf("Failed to close the TPM with error: %d\n", ret);
 }
 
-static void do_tpm_sha1_start(void) {
-
-
-	int ret = tpm_sha1_start();
-
-	printf("SHA1_START returned: %d\n", ret);
-}
-
-static void do_tpm_sha1_update(void) {
-
-
-	int ret = 0;//tpm_sha1_start();
-
-	printf("SHA1_START returned: %d\n", ret);
-}
-
-static void do_tpm_sha1_complete(void) {
-
-
-	int ret = 0;//tpm_sha1_start();
-
-	printf("SHA1_START returned: %d\n", ret);
-}
 /**
  * Print a byte string in hexdecimal format, 16-bytes per line.
  *
@@ -382,7 +350,6 @@ static int do_tpm_extend(cmd_tbl_t *cmdtp, int flag,
 		puts("PCR value after execution of the command:\n");
 		print_byte_string(out_digest, sizeof(out_digest));
 	}
-	printf("PCR_EXTEND finished with: %d\n", rc);
 
 	return convert_return_code(rc);
 }
@@ -595,14 +562,6 @@ static int do_tpmutil_nv_write(cmd_tbl_t *cmdtp, int flag,
 	U_BOOT_CMD_MKENT(cmd, 0, 1, do_tpm_ ## cmd, "", "")
 
 static cmd_tbl_t tpm_commands[] = {
-	U_BOOT_CMD_MKENT(sha1start, 0, 1,
-			do_tpm_sha1_start, "", ""),
-	U_BOOT_CMD_MKENT(sha1update, 0, 1,
-			do_tpm_sha1_update, "", ""),
-	U_BOOT_CMD_MKENT(sha1complete, 0, 1,
-			do_tpm_sha1_complete, "", ""),
-	U_BOOT_CMD_MKENT(open, 0, 1,
-			do_tpm_open, "", ""),
 	U_BOOT_CMD_MKENT(close, 0, 1,
 			do_tpm_close, "", ""),
 	U_BOOT_CMD_MKENT(init, 0, 1,

@@ -413,8 +413,6 @@ out:
 
 static int tpm_tis_i2c_send(struct tpm_chip *chip, u8 *buf, size_t len)
 {
-	printf("tpm_tis_i2c_send(): sending %d bytes\n", len);
-
 	int rc, status;
 	ssize_t burstcnt;
 	size_t count = 0;
@@ -452,8 +450,6 @@ static int tpm_tis_i2c_send(struct tpm_chip *chip, u8 *buf, size_t len)
 			burstcnt = CONFIG_TPM_TIS_I2C_BURST_LIMITATION;
 #endif /* CONFIG_TPM_TIS_I2C_BURST_LIMITATION */
 
-		printf("i2c: writing: %X\n", buf[len]);
-
 		rc = iic_tpm_write(TPM_DATA_FIFO(chip->vendor.locality),
 				&(buf[count]), burstcnt);
 		if (rc == 0)
@@ -471,7 +467,6 @@ static int tpm_tis_i2c_send(struct tpm_chip *chip, u8 *buf, size_t len)
 
 	}
 
-	printf("Write last byte\n");
 	/* Write last byte */
 	iic_tpm_write(TPM_DATA_FIFO(chip->vendor.locality), &(buf[count]), 1);
 	wait_for_stat(chip, TPM_STS_VALID, chip->vendor.timeout_c, &status);
@@ -480,7 +475,6 @@ static int tpm_tis_i2c_send(struct tpm_chip *chip, u8 *buf, size_t len)
 		goto out_err;
 	}
 
-	printf("Do it...\n");
 	/* Go and do it */
 	iic_tpm_write(TPM_STS(chip->vendor.locality), &sts, 1);
 

@@ -361,14 +361,6 @@ unsigned long tpm_calc_ordinal_duration(struct tpm_chip *chip, u32 ordinal)
 int tis_sendrecv(const uint8_t *sendbuf, size_t send_size, uint8_t *recvbuf,
 		size_t *recv_len)
 {
-	printf("Command length: %d\n", send_size);
-	printf("Command:\n");
-	int i = 0;
-	for(;i<send_size;i++) {
-		printf("%X ", sendbuf[i]);
-	}
-	printf("\n");
-
 	ssize_t rc;
 	u8 status;
 	u32 count, ordinal;
@@ -390,15 +382,8 @@ int tis_sendrecv(const uint8_t *sendbuf, size_t send_size, uint8_t *recvbuf,
 		error("invalid count value %x %zx\n", count, send_size);
 		return -EOVERFLOW;
 	}
-	printf("Sending to TPM with little endian...\n");
-	int j = 0;
-	for(;j<send_size;j++){
-		printf("%X ", sendbuf[j]);
-	}
-	printf("\n");
 
 	rc = tpm_chip.vendor.send(&tpm_chip, (u8 *)sendbuf, count);
-	printf("Sending finished, we got: %d\n", rc);
 
 	if (rc < 0) {
 		error("tpm_send: error %zd\n", rc);
@@ -407,8 +392,6 @@ int tis_sendrecv(const uint8_t *sendbuf, size_t send_size, uint8_t *recvbuf,
 
 	start = get_timer(0);
 	stop = tpm_calc_ordinal_duration(&tpm_chip, ordinal);
-	printf("Timer start: %ld && stop: %ld\n", start, stop);
-	printf("timer(start): %ld\n", get_timer(start));
 	do {
 		printf("%s: waiting for status...\n", __func__);
 		status = tpm_chip.vendor.status(&tpm_chip);
@@ -438,14 +421,6 @@ out_recv:
 		*recv_len = rc;
 	else
 		error("tpm_recv: error %zd\n", rc);
-
-	printf("TPM response:\n");
-	int b = 0;
-	for(;b<rc;b++){
-		printf("%X", recvbuf[b]);
-	}
-	printf("\n");
-
 out:
 	return rc >= 0 ? 0 : rc;
 }

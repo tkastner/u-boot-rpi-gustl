@@ -87,10 +87,8 @@ int pack_byte_string(uint8_t *str, size_t size, const char *format, ...)
 			return -1;
 		}
 
-		if (offset + length > size) {
-			printf("Size error\n");
+		if (offset + length > size)
 			return -1;
-		}
 
 		switch (*format) {
 		case 'b':
@@ -161,11 +159,8 @@ int unpack_byte_string(const uint8_t *str, size_t size, const char *format, ...)
 			return -1;
 		}
 
-		if (offset + length > size) {
-			printf("size error: offset + length > size\n");
-			printf("%d + %d > %d\n", offset, length, size);
+		if (offset + length > size)
 			return -1;
-		}
 
 		switch (*format) {
 		case 'b':
@@ -183,7 +178,6 @@ int unpack_byte_string(const uint8_t *str, size_t size, const char *format, ...)
 		}
 	}
 	va_end(args);
-	printf("Unpack done...\n");
 
 	return 0;
 }
@@ -419,10 +413,8 @@ uint32_t tpm_extend(uint32_t index, const void *in_digest, void *out_digest)
 
 	if (unpack_byte_string(response, response_length, "s",
 				out_digest_offset, out_digest,
-				0)) {
-		printf("UNPACK ERROR\n");
+				PCR_DIGEST_LENGTH))
 		return TPM_LIB_ERROR;
-	}
 
 	return 0;
 }
